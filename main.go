@@ -17,7 +17,7 @@ func main() {
 	var height int
 	var fps float64
 	flag.IntVar(&width, "width", -1, "width of each frame")
-	flag.IntVar(&width, "height", -1, "height of each frame")
+	flag.IntVar(&height, "height", -1, "height of each frame")
 	flag.Float64Var(&fps, "fps", 12.0, "frame rate of exported video")
 	flag.Usage = func() {
 		fmt.Fprintln(
