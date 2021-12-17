@@ -32,8 +32,8 @@ func main() {
 
 	if len(flag.Args()) != 2 {
 		flag.Usage()
-	} else if width == -1 || height == -1 {
-		essentials.Die("Provide -width and -height. See -help.")
+	} else if width == -1 && height == -1 {
+		essentials.Die("Provide -width or -height. See -help.")
 	}
 	inputPath := flag.Args()[0]
 	outputPath := flag.Args()[1]
@@ -44,8 +44,15 @@ func main() {
 	f.Close()
 	essentials.Must(err)
 
-	if img.Bounds().Dy() != height {
-		essentials.Die("height does not match file, expected", img.Bounds().Dy())
+	if height == -1 {
+		height = img.Bounds().Dy()
+	}
+	if width == -1 {
+		width = img.Bounds().Dx()
+	}
+
+	if img.Bounds().Dy() % height != 0 {
+		essentials.Die("height does not divide file heighr", img.Bounds().Dy())
 	} else if img.Bounds().Dx()%width != 0 {
 		essentials.Die("width does not divide file width", img.Bounds().Dx())
 	}
@@ -55,9 +62,11 @@ func main() {
 	defer func() {
 		essentials.Must(writer.Close())
 	}()
-	for x := 0; x < img.Bounds().Dx(); x += width {
-		crop := cropImage(img, x, 0, width, height)
-		essentials.Must(writer.WriteFrame(crop))
+	for y := 0; y < img.Bounds().Dy(); y += height {
+		for x := 0; x < img.Bounds().Dx(); x += width {
+			crop := cropImage(img, x, y, width, height)
+			essentials.Must(writer.WriteFrame(crop)
+		}
 	}
 }
 
