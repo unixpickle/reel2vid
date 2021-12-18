@@ -51,7 +51,7 @@ func main() {
 		width = img.Bounds().Dx()
 	}
 
-	if img.Bounds().Dy() % height != 0 {
+	if img.Bounds().Dy()%height != 0 {
 		essentials.Die("height does not divide file heighr", img.Bounds().Dy())
 	} else if img.Bounds().Dx()%width != 0 {
 		essentials.Die("width does not divide file width", img.Bounds().Dx())
@@ -65,16 +65,16 @@ func main() {
 	for y := 0; y < img.Bounds().Dy(); y += height {
 		for x := 0; x < img.Bounds().Dx(); x += width {
 			crop := cropImage(img, x, y, width, height)
-			essentials.Must(writer.WriteFrame(crop)
+			essentials.Must(writer.WriteFrame(crop))
 		}
 	}
 }
 
-func cropImage(img image.Image, x, y, width, height int) *image.RGBA {
+func cropImage(img image.Image, sx, sy, width, height int) *image.RGBA {
 	res := image.NewRGBA(image.Rect(0, 0, width, height))
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			res.Set(x, y, img.At(x+width+img.Bounds().Min.X, y+height+img.Bounds().Min.Y))
+			res.Set(x, y, img.At(x+sx+img.Bounds().Min.X, y+sy+img.Bounds().Min.Y))
 		}
 	}
 	return res
