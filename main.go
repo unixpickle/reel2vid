@@ -17,10 +17,12 @@ func main() {
 	var height int
 	var fps float64
 	var frameRepeat int
+	var loops int
 	flag.IntVar(&width, "width", -1, "width of each frame")
 	flag.IntVar(&height, "height", -1, "height of each frame")
 	flag.Float64Var(&fps, "fps", 12.0, "frame rate of exported video")
 	flag.IntVar(&frameRepeat, "frame-repeat", 1, "number of times to repeat each frame, for lower FPS")
+	flag.IntVar(&loops, "loops", 1, "number of times to repeat the whole video")
 	flag.Usage = func() {
 		fmt.Fprintln(
 			os.Stderr,
@@ -64,11 +66,13 @@ func main() {
 	defer func() {
 		essentials.Must(writer.Close())
 	}()
-	for y := 0; y < img.Bounds().Dy(); y += height {
-		for x := 0; x < img.Bounds().Dx(); x += width {
-			crop := cropImage(img, x, y, width, height)
-			for i := 0; i < frameRepeat; i++ {
-				essentials.Must(writer.WriteFrame(crop))
+	for i := 0; i < loops; i++ {
+		for y := 0; y < img.Bounds().Dy(); y += height {
+			for x := 0; x < img.Bounds().Dx(); x += width {
+				crop := cropImage(img, x, y, width, height)
+				for j := 0; j < frameRepeat; j++ {
+					essentials.Must(writer.WriteFrame(crop))
+				}
 			}
 		}
 	}
