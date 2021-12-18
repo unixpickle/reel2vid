@@ -18,11 +18,13 @@ func main() {
 	var fps float64
 	var frameRepeat int
 	var loops int
+	var transpose bool
 	flag.IntVar(&width, "width", -1, "width of each frame")
 	flag.IntVar(&height, "height", -1, "height of each frame")
 	flag.Float64Var(&fps, "fps", 12.0, "frame rate of exported video")
 	flag.IntVar(&frameRepeat, "frame-repeat", 1, "number of times to repeat each frame, for lower FPS")
 	flag.IntVar(&loops, "loops", 1, "number of times to repeat the whole video")
+	flag.BoolVar(&transpose, "transpose", false, "use column-major order for crops")
 	flag.Usage = func() {
 		fmt.Fprintln(
 			os.Stderr,
@@ -67,12 +69,26 @@ func main() {
 		essentials.Must(writer.Close())
 	}()
 	for i := 0; i < loops; i++ {
+		iterateCrops(img, width, height, transpose, func(x, y int) {
+			crop := cropImage(img, x, y, width, height)
+			for j := 0; j < frameRepeat; j++ {
+				essentials.Must(writer.WriteFrame(crop))
+			}
+		})
+	}
+}
+
+func iterateCrops(img image.Image, width, height int, transpose bool, f func(x, y int)) {
+	if !transpose {
 		for y := 0; y < img.Bounds().Dy(); y += height {
 			for x := 0; x < img.Bounds().Dx(); x += width {
-				crop := cropImage(img, x, y, width, height)
-				for j := 0; j < frameRepeat; j++ {
-					essentials.Must(writer.WriteFrame(crop))
-				}
+				f(x, y)
+			}
+		}
+	} else {
+		for x := 0; x < img.Bounds().Dx(); x += width {
+			for y := 0; y < img.Bounds().Dy(); y += height {
+				f(x, y)
 			}
 		}
 	}
